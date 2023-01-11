@@ -31,8 +31,7 @@ class Enemy {
   }
 
   draw() {
-    ctx.drawImage(this.image, this.frame * this.spriteWidth, 0, this.spriteWidth, this.spriteHeight, this.x, this.y, this.width, this.height);
-  }
+    ctx.drawImage(this.image, this.frame * this.spriteWidth, 0, this.spriteWidth, this.spriteHeight, this.x, this.y, this.width, this.height);  }
 }
 
 for (let i = 0; i < numberOfEnemies; i++) {
