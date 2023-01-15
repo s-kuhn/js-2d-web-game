@@ -21,4 +21,4 @@ trailingComma: all
 overrides:
   - files: ['*.ts', '*.mts', '*.js', '*.mjs', '*.cjs']
     options:
-      tabWidth: 4
+      tabWidth: 2
