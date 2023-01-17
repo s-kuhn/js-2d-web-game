@@ -52,8 +52,8 @@ window.addEventListener('load', (event) => {
       this.weight = 1;
     }
     draw(context) {
-      context.fillStyle = 'white';
-      context.fillRect(this.x, this.y, this.width, this.height);
+      //context.fillStyle = 'white';
+      //context.fillRect(this.x, this.y, this.width, this.height);
       context.drawImage(
         this.image,
         this.frameX * this.width,
@@ -68,6 +68,8 @@ window.addEventListener('load', (event) => {
     }
     update(input) {
       // TODO jump while run
+      if (this.frameX >= this.maxFrameX) this.frameX =0;
+      else this.frameX++;
       if (input.keys.indexOf('ArrowRight') > -1) {
         this.veloX = 5;
       } else if (input.keys.indexOf('ArrowLeft') > -1) {
@@ -137,19 +139,21 @@ window.addEventListener('load', (event) => {
       this.gameHeight = gameHeight;
       this.weight = 160;
       this.height = 119;
-      this.image = enemyImage;
-
-      //this.markedForDeletion = false;
-      this.frameX = 0;
-      /*this.maxFrame = 5;
-      this.frameInterval = 100;
-      this.frameTimer = 0;*/
+      this.image = document.getElementById('enemyImage');
       this.x = this.gameWidth;
       this.y = this.gameHeight - this.height;
+      this.frameX = 0;
+      this.maxFrame = 5;
+      this.fps = 20;
+      this.frameTimer = 0;
+      this.frameInterval = 1000 / this.fps;
+      this.veloX = 8;
+      //this.markedForDeletion = false;
     }
 
     draw(context) {
       context.fillStyle = 'white';
+      console.log('draw');
       context.fillRect(this.x, this.y, this.width, this.height);
       context.drawImage(
         this.image,
@@ -164,8 +168,15 @@ window.addEventListener('load', (event) => {
       );
     }
 
-    update() {
-      this.x--;
+    update(deltaTime) {
+      if (this.frameTimer > this.frameInterval) {
+        if (this.frameX >= this.maxFrame) this.frameX = 0;
+        else this.frameX++;
+        this.frameTimer = 0;
+      } else {
+        this.frameTimer += deltaTime;
+      }
+      this.x -= this.veloX;
     }
   }
 
@@ -179,7 +190,7 @@ window.addEventListener('load', (event) => {
     enemies.forEach((enemy) => {
       enemy.draw(ctx);
       console.log(enemy.x);
-      enemy.update();
+      enemy.update(deltaTime);
     });
   }
 
@@ -197,9 +208,9 @@ window.addEventListener('load', (event) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const deltaTime = timeStamp - lastTime;
     lastTime = timeStamp;
-    //background.draw(ctx);
-    //background.update(input);
-    //player.draw(ctx);
+    background.draw(ctx);
+    background.update(input);
+    player.draw(ctx);
     player.update(input);
     handleEnemies(deltaTime);
     requestAnimationFrame(animate);
