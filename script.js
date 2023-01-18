@@ -5,6 +5,8 @@ window.addEventListener('load', (event) => {
   canvas.width = 800;
   canvas.height = 720;
   let enemies = [];
+  let score = 0;
+  let gameOver = false;
 
   class InputHandler {
     constructor() {
@@ -45,15 +47,27 @@ window.addEventListener('load', (event) => {
       this.y = this.gameHeight - this.height;
       this.image = playerImage;
       this.frameX = 0;
+      this.maxFrameX = 8;
       this.frameY = 0;
-      this.maxFrameX = 0;
+      this.fps = 20;
+      this.frameTimer = 0;
+      this.frameInterval = 1000 / this.fps;
       this.veloX = 0;
       this.veloY = 0;
       this.weight = 1;
     }
     draw(context) {
-      //context.fillStyle = 'white';
-      //context.fillRect(this.x, this.y, this.width, this.height);
+      context.strokeStyle = 'white';
+      context.beginPath();
+      context.arc(
+        this.x + this.width / 2,
+        this.y + this.height / 2,
+        this.width / 2,
+        0,
+        Math.PI * 2,
+      );
+      context.stroke();
+
       context.drawImage(
         this.image,
         this.frameX * this.width,
@@ -66,10 +80,30 @@ window.addEventListener('load', (event) => {
         this.height,
       );
     }
-    update(input) {
+    update(input, deltaTime, enemies) {
       // TODO jump while run
-      if (this.frameX >= this.maxFrameX) this.frameX =0;
-      else this.frameX++;
+
+      // collision detection
+      enemies.forEach((enemy) => {
+        const dx = enemy.x + enemy.width / 2 - 10 - (this.x + this.width / 2);
+        const dy = enemy.y + enemy.height / 2 + 10 - (this.y + this.height / 2);
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        console.log(distance);
+        if (distance < enemy.width / 2 + this.width / 2) {
+          gameOver = true;
+        }
+      });
+
+      // sprite animations
+      if (this.frameTimer > this.frameInterval) {
+        if (this.frameX >= this.maxFrameX) this.frameX = 0;
+        else this.frameX++;
+        this.frameTimer = 0;
+      } else {
+        this.frameTimer += deltaTime;
+      }
+
+      // controls
       if (input.keys.indexOf('ArrowRight') > -1) {
         this.veloX = 5;
       } else if (input.keys.indexOf('ArrowLeft') > -1) {
@@ -79,7 +113,6 @@ window.addEventListener('load', (event) => {
       } else {
         this.veloX = 0;
       }
-      // TODO add more animation frames
       // horizontal movement
       this.x += this.veloX;
       if (this.x < 0) this.x = 0;
@@ -90,9 +123,11 @@ window.addEventListener('load', (event) => {
       this.y += this.veloY;
       if (!this.onGround()) {
         this.veloY += this.weight;
+        this.maxFrameX = 5;
         this.frameY = 1;
       } else {
         this.veloY = 0;
+        this.maxFrameX = 8;
         this.frameY = 0;
       }
       if (this.y > this.gameHeight - this.height)
@@ -137,7 +172,7 @@ window.addEventListener('load', (event) => {
     constructor(gameWidth, gameHeight) {
       this.gameWidth = gameWidth;
       this.gameHeight = gameHeight;
-      this.weight = 160;
+      this.width = 160;
       this.height = 119;
       this.image = document.getElementById('enemyImage');
       this.x = this.gameWidth;
@@ -148,13 +183,21 @@ window.addEventListener('load', (event) => {
       this.frameTimer = 0;
       this.frameInterval = 1000 / this.fps;
       this.veloX = 8;
-      //this.markedForDeletion = false;
+      this.markedForDeletion = false;
     }
 
     draw(context) {
-      context.fillStyle = 'white';
-      console.log('draw');
-      context.fillRect(this.x, this.y, this.width, this.height);
+      context.strokeStyle = 'white';
+      context.beginPath();
+      context.arc(
+        this.x + this.width / 2 - 10,
+        this.y + this.height / 2 + 10,
+        this.width / 2,
+        0,
+        Math.PI * 2,
+      );
+      context.stroke();
+
       context.drawImage(
         this.image,
         this.frameX * this.width,
@@ -170,50 +213,81 @@ window.addEventListener('load', (event) => {
 
     update(deltaTime) {
       if (this.frameTimer > this.frameInterval) {
-        if (this.frameX >= this.maxFrame) this.frameX = 0;
-        else this.frameX++;
+        if (this.frameX >= this.maxFrame) {
+          this.frameX = 0;
+        } else {
+          this.frameX++;
+        }
         this.frameTimer = 0;
       } else {
         this.frameTimer += deltaTime;
       }
       this.x -= this.veloX;
+      if (this.x < 0 - this.width) {
+        this.markedForDeletion = true;
+        score++;
+      }
     }
   }
 
   function handleEnemies(deltaTime) {
-    if (enemyTimer > enemyInterval) {
+    if (enemyTimer > enemyInterval + randomEnemyInterval) {
       enemies.push(new Enemy(canvas.width, canvas.height));
+      console.log(enemies);
+      randomEnemyInterval = Math.random() * 1000 + 500;
       enemyTimer = 0;
     } else {
       enemyTimer += deltaTime;
     }
     enemies.forEach((enemy) => {
       enemy.draw(ctx);
-      console.log(enemy.x);
       enemy.update(deltaTime);
     });
+    enemies = enemies.filter((enemy) => !enemy.markedForDeletion);
   }
 
-  function displayStatusText() {}
+  function displayStatusText(context) {
+    context.fillStyle = 'black';
+    context.font = '40px Helvetica';
+    context.fillText('Score: ' + score, 20, 50);
+    context.fillStyle = 'white';
+    context.font = '40px Helvetica';
+    context.fillText('Score: ' + score, 22, 52);
+    if (gameOver) {
+      context.textAlign = 'center';
+      context.fillStyle = 'black';
+      context.font = '40px Helvetica';
+      context.fillText(' Game Over \n Score: ' + score, canvas.width / 2, 200);
+      context.fillStyle = 'white';
+      context.font = '40px Helvetica';
+      context.fillText(
+        ' Game Over \n Score: ' + score,
+        canvas.width / 2 + 2,
+        202,
+      );
+    }
+  }
 
   const input = new InputHandler();
   const player = new Player(canvas.width, canvas.height);
   const background = new Background(canvas.width, canvas.height);
 
-  // TODO fix framerate
   let lastTime = 0;
   let enemyTimer = 0;
   let enemyInterval = 1000;
+  let randomEnemyInterval = Math.random() * 1000 + 500;
+
   function animate(timeStamp) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
     const deltaTime = timeStamp - lastTime;
     lastTime = timeStamp;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     background.draw(ctx);
     background.update(input);
     player.draw(ctx);
-    player.update(input);
+    player.update(input, deltaTime, enemies);
     handleEnemies(deltaTime);
-    requestAnimationFrame(animate);
+    displayStatusText(ctx);
+    if (!gameOver) requestAnimationFrame(animate);
   }
   animate(0);
 });
