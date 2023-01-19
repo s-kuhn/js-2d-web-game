@@ -11,22 +11,17 @@ window.addEventListener('load', function () {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
-  const player1 = new Player(canvas.width, canvas.height);
-  console.log(player1)
-  const input1 = new InputHandler();
+  const player = new Player(canvas.width, canvas.height);
+  const input = new InputHandler();
 
   let lastTime = 0;
-  let enemyTimer = 0;
-  let enemyInterval = 1000;
-  let randomEnemyInterval = Math.random() * 1000 + 500;
-
   function animate(timeStamp) {
+    const deltaTime = timeStamp - lastTime;
+    lastTime = timeStamp;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    player1.draw(ctx);
-    player1.update(input1.lastKey);
-    drwaStatusText(ctx, input1);
-    //const deltaTime = timeStamp - lastTime;
-    //lastTime = timeStamp;
+    player.update(input.lastKey, deltaTime);
+    player.draw(ctx);
+    drwaStatusText(ctx, input, player);
     requestAnimationFrame(animate);
   }
   animate(0);
