@@ -2,31 +2,24 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: 'Helvetica', cursive;
 }
 body {
-  background: black;
-
+  overflow: hidden;
 }
 
-#canvas1 {
-  background: blue;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border: 5px solid white;
-  max-width: 100%;
-  max-height: 100%;
+canvas {
+  top: 0;
+  left: 0;
 }
 
-#playerImage, #backgroundImage, #enemyImage {
+img {
   display: none;
 }
-#fullScreenButton {
+#loading {
   position: absolute;
-  font-size: 20px;
-  padding: 10px;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 50%;
+  width: 100%;
+  text-align: center;
+  font-size: 80px;
 }
