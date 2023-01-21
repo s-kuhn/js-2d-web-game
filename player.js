@@ -5,17 +5,16 @@ export class Player {
     this.height = 91.3;
     this.x = 0;
     this.y = this.game.height - this.height;
-    this.image = document.getElementById('playerImage');
+    this.image = playerImage;
   }
 
   update() {
-    this.x++;
+    //this.x++;
   }
 
   draw(context) {
-    //context.fillRect(this.x, this.y, this.width, this.height)
-
-    //console.log(this.image)
+    context.fillStyle='red';
+    context.fillRect(this.x, this.y, this.width, this.height);
     context.drawImage(
       this.image,
       0,

@@ -21,7 +21,7 @@ window.addEventListener('load', function () {
     }
   }
 
-  const game = new Game(canvas.width, canvas.height)
+  const game = new Game(canvas.width, canvas.height);
   console.log(game);
   
   function animate() {
