@@ -12,7 +12,6 @@ export class InputHandler {
       ) {
         this.keys.push(e.key);
       }
-      console.log(e.key, this.keys);
     });
     window.addEventListener('keyup', (e) => {
       if (
@@ -24,7 +23,6 @@ export class InputHandler {
       ) {
         this.keys.splice(this.keys.indexOf(e.key), 1);
       }
-      console.log(e.key, this.keys);
     });
   }
 }

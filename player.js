@@ -45,7 +45,7 @@ export class Player {
     this.y += this.veloY;
     if (!this.onGround()) this.veloY += this.weight;
     else this.veloY = 0;
-    
+
     // sprite animation
     if (this.frameTimer > this.frameInterval) {
       this.frameTimer = 0;
@@ -70,8 +70,9 @@ export class Player {
     );
   }
 
-  setState(state) {
+  setState(state, speed) {
     this.currentState = this.states[state];
+    this.game.speed = this.game.maxSpeed * speed;
     this.currentState.enter();
   }
 
