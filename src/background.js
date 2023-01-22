@@ -60,7 +60,7 @@ export class Background {
       this.game,
       this.width,
       this.height,
-      10,
+      1,
       this.layer5image,
     );
     this.backgroundLayers = [this.layer_1, this.layer_2, this.layer_3, this.layer_4, this.layer_5];
