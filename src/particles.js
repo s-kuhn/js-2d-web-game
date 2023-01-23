@@ -6,7 +6,7 @@ class Particle {
   update() {
     this.x -= this.veloX + this.game.speed;
     this.y -= this.veloY;
-    this.size *= 0.95;
+    this.size *= 0.97; //shrink
     if (this.size < 0.5) this.markedForDeletion = true;
   }
 }
@@ -14,15 +14,15 @@ class Particle {
 export class Dust extends Particle {
   constructor(game, x, y) {
     super(game);
-    this.size = Math.random() * 10 + 10;
+    this.size = Math.random() * 5 + 5;
     this.x = x;
     this.y = y;
     this.veloX = Math.random();
     this.veloY = Math.random();
-    this.color = 'rgba(0,0,0,0.2)'
+    this.color = 'rgba(0,0,0,0.2)';
   }
 
-  draw(context){
+  draw(context) {
     context.beginPath();
     context.arc(this.x, this.y, this.size, 0, Math.PI * 2);
     context.fillStyle = this.color;
@@ -30,6 +30,58 @@ export class Dust extends Particle {
   }
 }
 
-export class Splash extends Particle {}
+export class Splash extends Particle {
+  constructor(game, x, y) {
+    super(game);
+    this.size = Math.random() * 100 + 100;
+    this.x = x - this.size * 0.4;
+    this.y = y - this.size * 0.4;
+    this.veloX = Math.random() * 6 - 4;
+    this.veloY = Math.random() * 2 + 2;
+    this.gravity = 0;
+    this.image = fireImage;
+  }
 
-export class Fire extends Particle {}
+  update() {
+    super.update();
+    this.y += this.gravity;
+  }
+
+  draw(context) {
+    context.drawImage(this.image, this.x, this.y, this.size, this.size);
+  }
+}
+
+export class Fire extends Particle {
+  constructor(game, x, y) {
+    super(game);
+    this.image = fireImage;
+    this.size = Math.random() * 50 + 50;
+    this.x = x;
+    this.y = y;
+    this.veloX = 1;
+    this.veloY = 1;
+    this.angle = 0;
+    this.va = Math.random() * 0.2 - 0.1;
+  }
+  update() {
+    super.update();
+    this.angle += this.va;
+    this.x += Math.sin(this.angle * 5);
+  }
+
+  draw(context) {
+    context.save();
+    context.translate(this.x, this.y);
+    context.rotate(this.angle);
+    context.drawImage(
+      this.image,
+      -this.size * 0.5,
+      -this.size * 0.5,
+      this.size,
+      this.size,
+    );
+
+    context.restore();
+  }
+}

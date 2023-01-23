@@ -1,4 +1,4 @@
-import { Dust } from './particles.js';
+import { Dust, Fire, Splash } from './particles.js';
 
 // TODO add left and right states
 export const states = {
@@ -49,7 +49,7 @@ export class Running extends State {
     this.game.player.maxFrameX = 8;
   }
   handleInput(input) {
-    this.game.particles.push(
+    this.game.particles.unshift(
       new Dust(
         this.game,
         this.game.player.x + this.game.player.width * 0.5,
@@ -72,13 +72,15 @@ export class Jumping extends State {
     this.game.player.frameX = 0;
     this.game.player.frameY = 1;
     if (this.game.player.onGround()) this.game.player.veloY -= 27;
-    //this.player.veloX = this.player.maxSpeed * 0.5;
+    this.game.player.veloX = this.game.player.maxSpeed * 0.5;
     this.game.player.maxFrameX = 6;
   }
   handleInput(input) {
     if (this.game.player.veloY > this.game.player.weight)
       this.game.player.setState(states.FALLING, 1);
     else if (input.includes(' ')) this.game.player.setState(states.ROLLING, 2);
+    else if (input.includes('ArrowDown'))
+      this.game.player.setState(states.DIVING, 0);
   }
 }
 
@@ -95,6 +97,8 @@ export class Falling extends State {
     if (this.game.player.onGround())
       this.game.player.setState(states.RUNNING, 1);
     else if (input.includes(' ')) this.game.player.setState(states.ROLLING, 2);
+    else if (input.includes('ArrowDown'))
+      this.game.player.setState(states.DIVING, 0);
   }
 }
 
@@ -108,6 +112,13 @@ export class Rolling extends State {
     this.game.player.maxFrameX = 6;
   }
   handleInput(input) {
+    this.game.particles.unshift(
+      new Fire(
+        this.game,
+        this.game.player.x + this.game.player.width * 0.5,
+        this.game.player.y + this.game.player.height * 0.5,
+      ),
+    );
     if (!input.includes(' ') && this.game.player.onGround())
       this.game.player.setState(states.RUNNING, 1);
     else if (!input.includes(' ') && !this.game.player.onGround())
@@ -118,5 +129,58 @@ export class Rolling extends State {
       this.game.player.onGround()
     )
       this.game.player.veloY -= 27; // TODO refactor so no constant
+    else if (input.includes('ArrowDown') && !this.game.player.onGround())
+      this.game.player.setState(states.DIVING, 0);
+  }
+}
+
+export class Diving extends State {
+  constructor(game) {
+    super('DIVING', game);
+  }
+  enter() {
+    this.game.player.frameX = 0;
+    this.game.player.frameY = 6;
+    this.game.player.maxFrameX = 6;
+    this.game.player.veloY = 15;
+  }
+  handleInput(input) {
+    this.game.particles.unshift(
+      new Fire(
+        this.game,
+        this.game.player.x + this.game.player.width * 0.5,
+        this.game.player.y + this.game.player.height * 0.5,
+      ),
+    );
+    if (this.game.player.onGround()) {
+      this.game.player.setState(states.RUNNING, 1);
+      for (let i = 0; i < 30; i++) {
+        this.game.particles.unshift(
+          new Splash(
+            this.game,
+            this.game.player.x + this.game.player.width * 0.5,
+            this.game.player.y + this.game.player.height * 0.5,
+          ),
+        );
+      }
+    } else if (input.includes(' ') && this.game.player.onGround())
+      this.game.player.setState(states.ROLLING, 2);
+  }
+}
+
+export class Hit extends State {
+  constructor(game) {
+    super('HIT', game);
+  }
+  enter() {
+    this.game.player.frameX = 0;
+    this.game.player.frameY = 4;
+    this.game.player.maxFrameX = 10;
+  }
+  handleInput(input) {
+    if (this.game.player.frameX >= 10 && this.game.player.onGround()) {
+      this.game.player.setState(states.RUNNING, 1);
+    } else if (this.game.player.frameX >= 10 && !this.game.player.onGround())
+      this.game.player.setState(states.FALLING, 1);
   }
 }
